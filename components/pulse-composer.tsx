@@ -16,14 +16,6 @@ export function PulseComposer() {
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   };
 
-  const handlePulse = () => {
-    if (!text.trim()) return;
-    setText("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -31,7 +23,8 @@ export function PulseComposer() {
         isFocused && "border-accent/30 shadow-[0_0_30px_rgba(124,58,237,0.08)]"
       )}
     >
-      <div className="flex gap-3">
+      {/* FORMA DODATA OVDE */}
+      <form action="/api/post" method="POST" className="flex gap-3">
         {/* Avatar */}
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-sm font-bold text-accent">
           Y
@@ -41,6 +34,7 @@ export function PulseComposer() {
         <div className="flex-1">
           <textarea
             ref={textareaRef}
+            name="content" // OBAVEZNO ZA SUPABASE
             value={text}
             onChange={handleInput}
             onFocus={() => setIsFocused(true)}
@@ -48,6 +42,7 @@ export function PulseComposer() {
             placeholder="What's pulsing?"
             className="w-full resize-none bg-transparent text-base leading-relaxed text-foreground placeholder-muted-foreground outline-none"
             rows={1}
+            required
             aria-label="Compose a new pulse"
           />
 
@@ -59,40 +54,25 @@ export function PulseComposer() {
             )}
           >
             <div className="flex items-center gap-1">
-              <button
-                className="group flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-all duration-200 hover:bg-accent/10 hover:text-accent active:scale-90"
-                aria-label="Upload image"
-              >
-                <ImageIcon className="h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110" />
+              {/* Ovi dugmići su za sada samo ukras, dodajemo upload kasnije */}
+              <button type="button" className="group flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent/10 hover:text-accent transition-all">
+                <ImageIcon className="h-4.5 w-4.5" />
               </button>
-              <button
-                className="group flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-all duration-200 hover:bg-accent-blue/10 hover:text-accent-blue active:scale-90"
-                aria-label="Upload video"
-              >
-                <Video className="h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110" />
-              </button>
-              <button
-                className="group flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-all duration-200 hover:bg-amber-500/10 hover:text-amber-400 active:scale-90"
-                aria-label="Add emoji"
-              >
-                <Smile className="h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110" />
+              <button type="button" className="group flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent-blue/10 hover:text-accent-blue transition-all">
+                <Video className="h-4.5 w-4.5" />
               </button>
             </div>
 
-            {/* Character count + Pulse button */}
             <div className="flex items-center gap-3">
               {text.length > 0 && (
-                <span
-                  className={cn(
-                    "font-mono text-xs",
-                    text.length > 280 ? "text-destructive" : "text-muted-foreground"
-                  )}
-                >
+                <span className={cn("font-mono text-xs", text.length > 280 ? "text-destructive" : "text-muted-foreground")}>
                   {text.length}/280
                 </span>
               )}
+              
+              {/* DUGME JE SADA TYPE SUBMIT */}
               <button
-                onClick={handlePulse}
+                type="submit"
                 disabled={!text.trim() || text.length > 280}
                 className={cn(
                   "flex items-center gap-2 rounded-lg px-5 py-2 font-mono text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-95",
@@ -100,7 +80,6 @@ export function PulseComposer() {
                     ? "bg-accent text-accent-foreground glow-accent-sm hover:brightness-110"
                     : "cursor-not-allowed bg-muted text-muted-foreground"
                 )}
-                aria-label="Send pulse"
               >
                 <Zap className="h-4 w-4" />
                 <span>Pulse</span>
@@ -108,7 +87,7 @@ export function PulseComposer() {
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
