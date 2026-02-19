@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  --color-background: #050505;
+  --color-foreground: #f0f0f0;
+  --color-card: rgba(255, 255, 255, 0.04);
+  --color-card-foreground: #e0e0e0;
+  --color-muted: #1a1a1a;
+  --color-muted-foreground: #888888;
+  --color-accent: #7c3aed;
+  --color-accent-foreground: #f0f0f0;
+  --color-accent-blue: #3b82f6;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-ring: #7c3aed;
+  --color-input: #141414;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #f0f0f0;
+  --color-surface: #0a0a0a;
+  --color-surface-elevated: #111111;
+  --color-glow: rgba(124, 58, 237, 0.4);
+  --color-glow-blue: rgba(59, 130, 246, 0.3);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Glow effect for accent elements */
+.glow-accent {
+  box-shadow: 0 0 20px var(--color-glow), 0 0 60px rgba(124, 58, 237, 0.15);
+}
+
+.glow-accent-sm {
+  box-shadow: 0 0 10px var(--color-glow);
+}
