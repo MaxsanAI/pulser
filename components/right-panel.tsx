@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   TrendingUp,
   UserPlus,
@@ -9,189 +10,106 @@ import {
   Sun,
   Droplets,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const trendingPulses = [
-  { tag: "#AIRevolution", pulses: "12.4K", category: "Technology" },
-  { tag: "#NightCity", pulses: "8.7K", category: "Culture" },
-  { tag: "#QuantumLeap", pulses: "6.2K", category: "Science" },
-  { tag: "#CyberPunk2077", pulses: "5.1K", category: "Gaming" },
-  { tag: "#DarkMode", pulses: "4.8K", category: "Design" },
-];
-
-const suggestedUsers = [
-  { name: "Nova Chen", handle: "@nova_dev", avatar: "NC" },
-  { name: "Kai Tanaka", handle: "@kai_creates", avatar: "KT" },
-  { name: "Zara Okonkwo", handle: "@zara_pulse", avatar: "ZO" },
-];
-
-const breakingNews = [
-  {
-    headline: "Global Tech Summit Announces Breakthrough in Quantum Computing",
-    source: "TechPulse",
-    time: "2m ago",
-  },
-  {
-    headline: "New Framework Challenges React Dominance in Web Development",
-    source: "DevWire",
-    time: "15m ago",
-  },
-  {
-    headline: "Space Agency Confirms Signal Detection from Proxima Centauri",
-    source: "ScienceDaily",
-    time: "32m ago",
-  },
-  {
-    headline: "Major Cybersecurity Vulnerability Found in Popular IoT Devices",
-    source: "SecurityNow",
-    time: "1h ago",
-  },
-];
-
-const weatherData = {
-  temp: "18",
-  condition: "Partly Cloudy",
-  humidity: "62%",
-  location: "San Francisco, CA",
-};
-
-function WeatherIcon({ condition }: { condition: string }) {
-  switch (condition) {
-    case "Sunny":
-      return <Sun className="h-8 w-8 text-amber-400" />;
-    case "Cloudy":
-      return <Cloud className="h-8 w-8 text-muted-foreground" />;
-    default:
-      return <CloudSun className="h-8 w-8 text-accent-blue" />;
-  }
-}
-
 export function RightPanel() {
+  const [weather, setWeather] = useState({ temp: "--", condition: "Loading...", location: "Locating..." });
+  const [loadingWeather, setLoadingWeather] = useState(true);
+
+  // FETCH REAL WEATHER DATA
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+        const data = await res.json();
+        
+        // Jednostavna logika za ikone
+        const temp = Math.round(data.current_weather.temperature);
+        setWeather({
+          temp: temp.toString(),
+          condition: data.current_weather.weathercode < 3 ? "Clear Sky" : "Cloudy",
+          location: "Your Location"
+        });
+      } catch (err) {
+        console.error("Weather failed", err);
+      } finally {
+        setLoadingWeather(false);
+      }
+    });
+  }, []);
+
   return (
-    <aside className="hidden w-80 flex-shrink-0 space-y-4 overflow-y-auto p-4 xl:block" role="complementary" aria-label="Dashboard sidebar">
-      {/* Weather Widget */}
-      <section className="glass rounded-xl p-4" aria-label="Weather">
-        <div className="mb-3 flex items-center gap-2 text-muted-foreground">
-          <CloudSun className="h-4 w-4" />
-          <h2 className="font-mono text-xs uppercase tracking-wider">
-            Weather
-          </h2>
+    <aside className="hidden w-80 flex-shrink-0 space-y-4 overflow-y-auto p-4 xl:block">
+      
+      {/* Dynamic Weather Widget */}
+      <section className="glass rounded-xl p-4 border border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent">
+        <div className="mb-3 flex items-center gap-2 text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em]">
+          <CloudSun className="h-3 w-3 text-accent" />
+          <h2>Real-time Weather</h2>
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-3xl font-bold tracking-tight text-foreground">
-              {weatherData.temp}&deg;C
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {weatherData.condition}
-            </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {weatherData.location}
-            </p>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <WeatherIcon condition={weatherData.condition} />
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Droplets className="h-3 w-3" />
-              <span>{weatherData.humidity}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trending Pulses */}
-      <section className="glass rounded-xl p-4" aria-label="Trending Pulses">
-        <div className="mb-3 flex items-center gap-2 text-muted-foreground">
-          <TrendingUp className="h-4 w-4" />
-          <h2 className="font-mono text-xs uppercase tracking-wider">
-            Trending Pulses
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {trendingPulses.map((trend) => (
-            <button
-              key={trend.tag}
-              className="group flex w-full flex-col rounded-lg px-2 py-1.5 text-left transition-all duration-200 hover:bg-card active:scale-[0.98]"
-            >
-              <span className="font-mono text-xs text-muted-foreground">
-                {trend.category}
-              </span>
-              <span className="text-sm font-semibold text-foreground transition-colors group-hover:text-accent">
-                {trend.tag}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground">
-                {trend.pulses} pulses
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Breaking News */}
-      <section className="glass rounded-xl p-4" aria-label="Breaking News">
-        <div className="mb-3 flex items-center gap-2 text-muted-foreground">
-          <Newspaper className="h-4 w-4" />
-          <h2 className="font-mono text-xs uppercase tracking-wider">
-            Breaking News
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {breakingNews.map((news, i) => (
-            <button
-              key={i}
-              className="group flex w-full flex-col gap-1 rounded-lg px-2 py-1.5 text-left transition-all duration-200 hover:bg-card active:scale-[0.98]"
-            >
-              <p className="text-sm leading-snug text-card-foreground transition-colors group-hover:text-foreground">
-                {news.headline}
-              </p>
-              <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-                <span>{news.source}</span>
-                <span aria-hidden="true">{"/"}</span>
-                <span>{news.time}</span>
-                <ExternalLink className="ml-auto h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Who to Follow */}
-      <section className="glass rounded-xl p-4" aria-label="Who to follow">
-        <div className="mb-3 flex items-center gap-2 text-muted-foreground">
-          <UserPlus className="h-4 w-4" />
-          <h2 className="font-mono text-xs uppercase tracking-wider">
-            Who to Follow
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {suggestedUsers.map((user) => (
-            <div
-              key={user.handle}
-              className="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-all duration-200 hover:bg-card"
-            >
-              <div
-                className={cn(
-                  "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-xs font-bold text-accent"
-                )}
-              >
-                {user.avatar}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {user.name}
+            {loadingWeather ? (
+              <Loader2 className="h-6 w-6 animate-spin text-accent/20" />
+            ) : (
+              <>
+                <p className="text-3xl font-black tracking-tighter text-foreground italic">
+                  {weather.temp}°C
                 </p>
-                <p className="truncate font-mono text-xs text-muted-foreground">
-                  {user.handle}
+                <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-widest">
+                  {weather.condition}
                 </p>
-              </div>
-              <button className="flex-shrink-0 rounded-lg border border-accent/30 px-3 py-1 font-mono text-xs text-accent transition-all duration-200 hover:bg-accent/10 hover:border-accent/60 active:scale-95">
-                Follow
-              </button>
+              </>
+            )}
+          </div>
+          <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center border border-accent/20">
+             <Sun className="h-6 w-6 text-accent animate-pulse" />
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Section (Ovo ostavljamo slično, ali sa neon efektima) */}
+      <section className="glass rounded-xl p-4 border border-white/5">
+        <div className="mb-4 flex items-center gap-2 text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em]">
+          <TrendingUp className="h-3 w-3 text-purple-500" />
+          <h2>Trending Pulses</h2>
+        </div>
+        <div className="space-y-4">
+          {[
+            { tag: "#NextJS16", pulses: "42K", category: "Tech" },
+            { tag: "#CloudflareAI", pulses: "12K", category: "AI" },
+            { tag: "#Supabase", pulses: "8K", category: "Dev" }
+          ].map((trend) => (
+            <div key={trend.tag} className="group cursor-pointer">
+              <p className="text-[10px] text-white/20 font-bold uppercase">{trend.category}</p>
+              <p className="text-sm font-bold group-hover:text-accent transition-colors">{trend.tag}</p>
+              <p className="text-[10px] text-white/40">{trend.pulses} pulses</p>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Breaking News (Mesto za Cloudflare AI) */}
+      <section className="glass rounded-xl p-4 border border-white/5 bg-accent/5">
+        <div className="mb-4 flex items-center gap-2 text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em]">
+          <Newspaper className="h-3 w-3 text-blue-400" />
+          <h2>AI News Summary</h2>
+        </div>
+        <div className="space-y-4 text-xs italic text-white/70 leading-relaxed">
+          <p className="border-l-2 border-accent pl-3">
+            "AI models are now capable of generating full social media architectures in seconds..." 
+            <span className="block mt-1 text-[9px] text-white/20 uppercase not-italic">Summarized by PulsersAI</span>
+          </p>
+        </div>
+      </section>
+
+      {/* Footer info */}
+      <div className="px-4 py-2 text-[9px] font-mono text-white/10 uppercase tracking-widest">
+        © 2026 Pulsers Network // v1.0.4-beta
+      </div>
     </aside>
   );
 }
