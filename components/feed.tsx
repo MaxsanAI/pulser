@@ -3,98 +3,59 @@
 import { PulseComposer } from "./pulse-composer";
 import { FeedCard, type PulseData } from "./feed-card";
 
-const samplePulses: PulseData[] = [
-  {
-    id: "1",
-    user: { name: "Nova Chen", handle: "@nova_dev", avatar: "NC" },
-    content:
-      "Just shipped a new dark mode implementation using CSS custom properties. The trick? Using oklch color space for perceptually uniform gradients. Zero flickering on page load.",
-    timestamp: "2m",
-    likes: 128,
-    replies: 24,
-    shares: 15,
-  },
-  {
-    id: "2",
-    user: { name: "Kai Tanaka", handle: "@kai_creates", avatar: "KT" },
-    content:
-      "The future of web development is not about frameworks. It's about understanding the platform. Web APIs have gotten insanely powerful - view transitions, container queries, anchor positioning. Stop adding dependencies, start learning the spec.",
-    image: "architecture-diagram.webp",
-    timestamp: "15m",
-    likes: 342,
-    replies: 67,
-    shares: 89,
-  },
-  {
-    id: "3",
-    user: { name: "Zara Okonkwo", handle: "@zara_pulse", avatar: "ZO" },
-    content:
-      "Hot take: AI won't replace developers. But developers who use AI will replace those who don't. The real skill is knowing what to ask and how to validate the output.",
-    timestamp: "1h",
-    likes: 891,
-    replies: 156,
-    shares: 234,
-  },
-  {
-    id: "4",
-    user: { name: "Marcus Rivera", handle: "@marcus_r", avatar: "MR" },
-    content:
-      "Built a real-time collaborative editor this weekend. Used CRDTs instead of OT. The difference in conflict resolution is night and day. Sharing my learnings in a thread below.",
-    image: "editor-screenshot.webp",
-    timestamp: "2h",
-    likes: 267,
-    replies: 43,
-    shares: 51,
-  },
-  {
-    id: "5",
-    user: { name: "Aisha Patel", handle: "@aisha_codes", avatar: "AP" },
-    content:
-      "Reminder: accessibility is not a feature. It's a requirement. If your app can't be navigated with a keyboard, it's broken. Period. Run axe-core in your CI pipeline.",
-    timestamp: "3h",
-    likes: 512,
-    replies: 78,
-    shares: 167,
-  },
-  {
-    id: "6",
-    user: { name: "Liam O'Brien", handle: "@liam_tech", avatar: "LO" },
-    content:
-      "Quantum computing just crossed 1000 logical qubits. We're entering a new era. The encryption protocols we rely on today have maybe 5-10 years before they're obsolete. Start planning your post-quantum migration now.",
-    timestamp: "5h",
-    likes: 1024,
-    replies: 203,
-    shares: 445,
-  },
-];
+// OVO JE KLJUČNA PROMENA: Feed sada prima "initialPosts" i "user"
+export function Feed({ initialPosts, user }: { initialPosts: any[], user: any }) {
+  
+  // Pretvaramo podatke iz Supabase formata u format koji tvoj v0 dizajn razume
+  const realPulses: PulseData[] = initialPosts?.map((post) => ({
+    id: post.id,
+    user: { 
+      name: user?.email?.split('@')[0] || "User", 
+      handle: `@${user?.email?.split('@')[0] || "user"}`, 
+      avatar: user?.email?.[0].toUpperCase() || "P" 
+    },
+    content: post.content,
+    timestamp: new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    likes: 0,
+    replies: 0,
+    shares: 0,
+  })) || [];
 
-export function Feed() {
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1 overflow-y-auto border-x border-white/5">
       <div className="mx-auto max-w-2xl space-y-4 p-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="font-mono text-lg font-bold tracking-widest text-foreground">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-mono text-xl font-black tracking-[0.3em] text-foreground italic">
             PULSERS
           </h1>
-          <div className="flex gap-1">
-            <button className="rounded-lg px-3 py-1.5 font-mono text-xs font-bold text-accent transition-all duration-200 hover:bg-accent/10 active:scale-95">
-              For You
+          <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
+            <button className="rounded-md px-3 py-1 font-mono text-[10px] font-bold bg-accent text-accent-foreground">
+              GLOBAL
             </button>
-            <button className="rounded-lg px-3 py-1.5 font-mono text-xs text-muted-foreground transition-all duration-200 hover:bg-card hover:text-foreground active:scale-95">
-              Following
+            <button className="rounded-md px-3 py-1 font-mono text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors">
+              FOLLOWING
             </button>
           </div>
         </div>
 
-        {/* Composer */}
+        {/* Composer - ovde kucaš postove */}
         <PulseComposer />
 
-        {/* Feed */}
-        <div className="space-y-3">
-          {samplePulses.map((pulse) => (
-            <FeedCard key={pulse.id} pulse={pulse} />
-          ))}
+        {/* Feed - ovde se prikazuju pravi postovi */}
+        <div className="space-y-3 mt-8">
+          {realPulses.length > 0 ? (
+            realPulses.map((pulse) => (
+              <FeedCard key={pulse.id} pulse={pulse} />
+            ))
+          ) : (
+            // Ako nema postova u bazi, prikaži ovo:
+            <div className="glass rounded-xl p-10 text-center border border-dashed border-white/10">
+              <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
+                No pulses detected in your area...
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </main>
